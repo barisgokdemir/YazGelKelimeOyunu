@@ -1,0 +1,16 @@
+C:\Users\baris\source\repos\KelimeOyunu\bin\Debug\KelimeOyunu.exe.config
+C:\Users\baris\source\repos\KelimeOyunu\bin\Debug\KelimeOyunu.exe
+C:\Users\baris\source\repos\KelimeOyunu\bin\Debug\KelimeOyunu.pdb
+C:\Users\baris\source\repos\KelimeOyunu\bin\Debug\Newtonsoft.Json.dll
+C:\Users\baris\source\repos\KelimeOyunu\bin\Debug\Newtonsoft.Json.xml
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.Properties.Resources.resources
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.csproj.GenerateResource.cache
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.csproj.CoreCompileInputs.cache
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.csproj.CopyComplete
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.exe
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.pdb
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.anaMenu.resources
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.Oyun.resources
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.KelimeEkle.resources
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.csprojAssemblyReference.cache
+C:\Users\baris\source\repos\KelimeOyunu\obj\Debug\KelimeOyunu.skorTablosu.resources
