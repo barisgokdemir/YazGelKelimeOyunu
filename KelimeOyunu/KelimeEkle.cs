@@ -19,16 +19,25 @@ namespace KelimeOyunu
         json newJson = new json();
         private void btnEkle_Click(object sender, EventArgs e)
         {
-            string soru, cevap,harfsayisi;
-            // json olası hataların önune geçmek ve dosya yapımızı korumak için kontroller ek” 
-            string v = soruText.Text.Replace('"', ' ').Replace(':', ' ').Replace('”',' ').Replace('“', ' ');
-            soru = v;
-            cevap = cevapText.Text;
-            harfsayisi = cevapText.Text.Length.ToString();
-            newJson.JsonYazma(soru,cevap,harfsayisi,@"C:\Users\baris\source\repos\KelimeOyunu\sorucevap.json");
-            cevapText.Text = "";
-            soruText.Text = "";
+            if (cevapText.Text.Length>=4 && cevapText.Text.Length <= 10)
+            {
 
+
+
+                string soru, cevap, harfsayisi;
+                // json olası hataların önune geçmek ve dosya yapımızı korumak için kontroller ek” 
+                string v = soruText.Text.Replace('"', ' ').Replace(':', ' ').Replace('”', ' ').Replace('“', ' ');
+                soru = v;
+                cevap = cevapText.Text;
+                harfsayisi = cevapText.Text.Length.ToString();
+                newJson.JsonYazma(soru, cevap, harfsayisi, @"C:\Users\baris\source\repos\KelimeOyunu\sorucevap.json");
+                cevapText.Text = "";
+                soruText.Text = "";
+            }
+            else
+            {
+                MessageBox.Show("lütfen en az 4 harfli  en çok 10 harfli cevap kelimesi giriniz ");
+            }
         }
     }
 }
