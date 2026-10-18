@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YazGel Kelime Oyunu</title>
+  <meta name="description" content="Tarayıcıda oynanan Türkçe kelime yarışması: 14 soru, 4 dakika, 3 rakip.">
+  <meta name="theme-color" content="#16236b">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 115'%3E%3Cpolygon points='50,0 100,29 100,86 50,115 0,86 0,29' fill='%23f2b632'/%3E%3Ctext x='50' y='78' font-size='62' font-family='Arial' font-weight='700' text-anchor='middle' fill='%2316236b'%3EY%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap&subset=latin-ext" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="sahne">
+
+    <!-- Giriş -->
+    <section id="ekran-giris" class="ekran giris" aria-labelledby="baslik">
+      <h1 id="baslik" class="logo" aria-label="YazGel Kelime Oyunu">
+        <span class="logo-petekler" aria-hidden="true">
+          <span class="petek">Y</span><span class="petek">A</span><span class="petek">Z</span><span class="petek">G</span><span class="petek">E</span><span class="petek">L</span>
+        </span>
+        <span class="logo-alt">Kelime Oyunu</span>
+      </h1>
+
+      <p class="giris-ozet">14 soru, 4 dakika, 3 rakip. Harf alırsan puanın azalır, yanlış cevap puan götürür.</p>
+
+      <form id="giris-formu" class="giris-formu" novalidate>
+        <label for="oyuncu-adi">Adın</label>
+        <div class="giris-satiri">
+          <input id="oyuncu-adi" name="oyuncu-adi" type="text" maxlength="20" autocomplete="nickname" required placeholder="Adını yaz">
+          <button type="submit" class="dugme dugme-ana" id="oyna-dugmesi" disabled>Oyna</button>
+        </div>
+        <p id="giris-mesaji" class="form-mesaji" role="alert"></p>
+      </form>
+
+      <nav class="giris-baglantilari" aria-label="Diğer">
+        <button type="button" class="dugme dugme-sade" data-ac="kurallar">Nasıl oynanır</button>
+        <button type="button" class="dugme dugme-sade" data-ekran-git="skorlar">Skor tablosu</button>
+      </nav>
+
+      <details class="ozel-set">
+        <summary>Kendi sorularınla oyna</summary>
+        <p>Soru setini JSON dosyası olarak yükle. Her uzunluktan (4–10 harf) en az 2 soru olmalı. Biçim README'de; eski masaüstü sürümünün <code>sorucevap.json</code> dosyası da çalışır.</p>
+        <input type="file" id="set-dosyasi" accept=".json,application/json">
+        <p id="set-durumu" class="set-durumu" aria-live="polite"></p>
+        <button type="button" class="dugme dugme-sade" id="varsayilan-set" hidden>Varsayılan sorulara dön</button>
+      </details>
+    </section>
+
+    <!-- Oyun -->
+    <section id="ekran-oyun" class="ekran oyun" hidden aria-label="Oyun">
+      <header class="oyun-ust">
+        <div class="gosterge">
+          <span class="gosterge-etiket">Soru</span>
+          <span class="gosterge-deger" id="soru-no">1/14</span>
+        </div>
+        <div class="gosterge gosterge-sure" id="sure-kutusu">
+          <span class="gosterge-etiket">Süre</span>
+          <span class="gosterge-deger" id="sure" aria-live="off">4:00</span>
+        </div>
+        <div class="gosterge">
+          <span class="gosterge-etiket">Puan</span>
+          <span class="gosterge-deger" id="puan">0</span>
+        </div>
+        <button type="button" class="ses-dugmesi" id="ses-dugmesi" aria-pressed="true" title="Sesi kapat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="ses-dalga" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span class="gorunmez">Ses</span>
+        </button>
+      </header>
+
+      <ol class="rakipler" id="rakipler" aria-label="Rakipler"></ol>
+
+      <div class="soru-alani">
+        <p class="soru-bilgi">
+          <span id="harf-sayisi">4 harf</span>
+          <span class="soru-degeri" id="soru-degeri">400 puan</span>
+        </p>
+        <p class="soru-metni" id="soru-metni" tabindex="-1"></p>
+        <div class="kutular" id="kutular" aria-label="Harfler"></div>
+        <p class="geri-bildirim" id="geri-bildirim" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="kontroller" id="kontroller">
+        <button type="button" class="dugme" id="harf-al"><kbd>H</kbd> Harf al</button>
+        <button type="button" class="dugme dugme-ana" id="cevapla"><kbd>Enter</kbd> Cevapla</button>
+        <button type="button" class="dugme dugme-sade" id="pas"><kbd>P</kbd> Pas</button>
+      </div>
+
+      <form class="cevap-formu" id="cevap-formu" hidden novalidate>
+        <div class="cevap-suresi" aria-hidden="true"><span id="cevap-cubugu"></span></div>
+        <label for="cevap" class="gorunmez">Cevabın</label>
+        <div class="giris-satiri">
+          <input id="cevap" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="send">
+          <button type="submit" class="dugme dugme-ana">Gönder</button>
+        </div>
+        <p class="cevap-ipucu"><span id="cevap-kalan">20</span> saniyen var. Yanlış cevap <span id="ceza">400</span> puan götürür.</p>
+      </form>
+    </section>
+
+    <!-- Sonuç -->
+    <section id="ekran-sonuc" class="ekran sonuc" hidden aria-labelledby="sonuc-baslik">
+      <h2 id="sonuc-baslik" class="sonuc-baslik" tabindex="-1"></h2>
+      <p class="sonuc-ozet" id="sonuc-ozet"></p>
+      <ol class="siralama" id="siralama"></ol>
+      <p class="sonuc-not" id="sonuc-not"></p>
+      <div class="sonuc-dugmeleri">
+        <button type="button" class="dugme dugme-ana" id="tekrar-oyna">Tekrar oyna</button>
+        <button type="button" class="dugme" data-ekran-git="skorlar">Skor tablosu</button>
+        <button type="button" class="dugme dugme-sade" data-ekran-git="giris">Ana menü</button>
+      </div>
+      <details class="soru-ozeti">
+        <summary>Sorular ve cevaplar</summary>
+        <ol id="soru-listesi"></ol>
+      </details>
+    </section>
+
+    <!-- Skor tablosu -->
+    <section id="ekran-skorlar" class="ekran skorlar" hidden aria-labelledby="skor-baslik">
+      <h2 id="skor-baslik" tabindex="-1">Skor tablosu</h2>
+      <p class="skor-aciklama">Bu tarayıcıda oynanan en iyi 10 oyun.</p>
+      <div class="tablo-sarici">
+        <table class="skor-tablosu">
+          <thead>
+            <tr><th scope="col">#</th><th scope="col">Oyuncu</th><th scope="col">Puan</th><th scope="col">Sıra</th><th scope="col">Kalan süre</th><th scope="col">Tarih</th></tr>
+          </thead>
+          <tbody id="skor-satirlari"></tbody>
+        </table>
+      </div>
+      <p class="bos-durum" id="skor-bos" hidden>Henüz skor yok. İlk oyununu oyna, adın burada görünsün.</p>
+      <div class="sonuc-dugmeleri">
+        <button type="button" class="dugme dugme-ana" data-ekran-git="giris">Ana menü</button>
+        <button type="button" class="dugme dugme-sade" id="skorlari-temizle">Skorları temizle</button>
+      </div>
+    </section>
+
+  </main>
+
+  <dialog id="kurallar" class="kurallar" aria-labelledby="kurallar-baslik">
+    <h2 id="kurallar-baslik">Nasıl oynanır</h2>
+    <ol>
+      <li>4 harfliden 10 harfliye kadar her uzunluktan 2, toplam 14 soru gelir. Hepsi için 4 dakikan var.</li>
+      <li>Her harf 100 puan değerinde. <strong>Harf al</strong> dediğinde rastgele bir harf açılır ve sorunun değeri 100 puan düşer.</li>
+      <li>Cevabı bildiğinde <strong>Cevapla</strong>'ya bas. Ana süre durur, cevap için 20 saniyen olur.</li>
+      <li>Doğru cevap sorunun kalan değerini kazandırır. Yanlış cevap ya da cevap süresinin dolması aynı değeri puanından düşer.</li>
+      <li>Emin değilsen <strong>Pas</strong> geç: puan kazanmaz, kaybetmezsin.</li>
+      <li>Oyun sonunda puanın 3 rakibin puanıyla karşılaştırılır.</li>
+    </ol>
+    <p class="kisayollar">Kısayollar: <kbd>H</kbd> harf al, <kbd>Enter</kbd> cevapla, <kbd>P</kbd> pas.</p>
+    <form method="dialog"><button class="dugme dugme-ana">Anladım</button></form>
+  </dialog>
+
+  <footer class="altbilgi">
+    <p>YazGel Kelime Oyunu, 2021'de C# ile yazılmış masaüstü oyununun web sürümüdür.
+      <a href="https://github.com/barisgokdemir/YazGelKelimeOyunu/releases/tag/v1.0-masaustu">İlk sürüm</a>
+      <a href="https://github.com/barisgokdemir/YazGelKelimeOyunu">Kaynak kod</a></p>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
