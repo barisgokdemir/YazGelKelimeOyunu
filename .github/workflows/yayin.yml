@@ -1,0 +1,93 @@
+name: Test ve yayın
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Testler
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+
+  yayin:
+    name: GitHub Pages
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Site dosyalarını hazırla
+        run: |
+          mkdir _site
+          cp -r index.html css js data _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  # Eski masaüstü sürümü (2021) için etiket ve Release oluşturur. Bir kez çalışır, sonra atlanır.
+  v1-release:
+    name: v1 masaüstü sürümünü arşivle
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ETIKET: v1.0-masaustu
+      V1_COMMIT: 0b77b0318c6606fdeb39016a1534df9885f50f6f
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Release var mı?
+        id: kontrol
+        run: |
+          if gh release view "$ETIKET" >/dev/null 2>&1; then
+            echo "var=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "var=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: v1 dosyalarını paketle
+        if: steps.kontrol.outputs.var == 'false'
+        run: |
+          mkdir v1 && cd v1
+          for f in bin/Debug/KelimeOyunu.exe bin/Debug/KelimeOyunu.exe.config bin/Debug/Newtonsoft.Json.dll sorucevap.json; do
+            git show "$V1_COMMIT:KelimeOyunu/$f" > "$(basename "$f")"
+          done
+          zip -q ../YazGel-v1.0-masaustu.zip *
+          cd .. && git archive --format=zip --prefix=YazGelKelimeOyunu-v1/ -o YazGel-v1.0-kaynak.zip "$V1_COMMIT" KelimeOyunu README.md
+      - name: Etiket ve Release oluştur
+        if: steps.kontrol.outputs.var == 'false'
+        run: |
+          cat > notlar.md <<'EOF'
+          2021'de C# WinForms (.NET Framework 4.7.2) ile yazılmış ilk sürüm. Kod, o günkü haliyle korunmuştur.
+
+          Güncel ve tarayıcıda oynanabilir sürüm için deponun ana sayfasına bakın.
+
+          **Not:** Bu sürüm soru ve skor dosyalarını geliştiricinin bilgisayarındaki sabit bir yoldan
+          (`C:\Users\baris\source\repos\KelimeOyunu\`) okur. Başka bir bilgisayarda çalıştırmak için
+          `sorucevap.json` ve `Skor.json` dosyalarını bu klasöre koymak gerekir. Bu sorun web sürümünde giderildi.
+          EOF
+          gh release create "$ETIKET" YazGel-v1.0-masaustu.zip YazGel-v1.0-kaynak.zip \
+            --target "$V1_COMMIT" --title "v1.0 - Masaüstü sürümü (2021)" --notes-file notlar.md

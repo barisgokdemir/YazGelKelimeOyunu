@@ -1,0 +1,12 @@
+{
+  "name": "yazgel-kelime-oyunu",
+  "version": "2.0.0",
+  "private": true,
+  "description": "YazGel Kelime Oyunu - tarayıcıda oynanan Türkçe kelime yarışması",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "start": "npx --yes serve ."
+  },
+  "license": "MIT"
+}
